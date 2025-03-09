@@ -106,16 +106,26 @@ def show_camera_stream():
 
             # Apply grid overlay if enabled
             if grid_overlay_var.get():
-                for i in range(1, 4):  # 3x3 grid
-                    for j in range(1, 4):
-                        x = i * color_image.shape[1] // 3
-                        y = j * color_image.shape[0] // 3
+                rows, cols = 4, 4  # Increase grid points to 16 (4x4 grid)
+                for i in range(1, cols):
+                    for j in range(1, rows):
+                        x = i * color_image.shape[1] // cols
+                        y = j * color_image.shape[0] // rows
+                        
+                        # Draw grid lines
                         cv2.line(color_image, (x, 0), (x, color_image.shape[0]), (0, 255, 0), 1)
                         cv2.line(color_image, (0, y), (color_image.shape[1], y), (0, 255, 0), 1)
                         
                         # Display depth at grid points
                         depth_value = depth_frame.get_distance(x, y)
-                        cv2.putText(color_image, f"{depth_value:.2f}m", (x + 10, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                        if depth_value == 0:
+                            depth_value_text = "N/A"
+                            depth_color = (255, 165, 0)  # Orange color
+                        else:
+                            depth_value_text = f"{depth_value:.2f}m"
+                            depth_color = (255, 165, 0)  # Orange color
+                        
+                        cv2.putText(color_image, depth_value_text, (x + 5, y + 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, depth_color, 2)
 
             # Display the frame
             cv2.imshow("RealSense Camera Stream", color_image)
@@ -193,10 +203,10 @@ Checkbutton(control_frame, text="Show Grid Overlay", variable=grid_overlay_var, 
 
 # Camera Buttons
 camera_button = Button(control_frame, text="Start Camera Stream", command=start_camera_thread, font=button_font, bg="#5E81AC", fg="white")
-camera_button.pack(pady=10)
+camera_button.pack(pady=20)
 
 stop_camera_button = Button(control_frame, text="Stop Camera Stream", command=stop_camera_stream, font=button_font, bg="#BF616A", fg="white")
-stop_camera_button.pack(pady=10)
+stop_camera_button.pack(pady=20)
 
 # Start updating UI
 update_ui()
